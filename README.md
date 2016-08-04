@@ -1,2 +1,2 @@
 # golem
-Golem is chat bot for slack. 
+Golem is chat bot for slack.

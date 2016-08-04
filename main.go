@@ -31,7 +31,7 @@ func main() {
     // chSender := make(chan slack.OutgoingMessage)
     chReceiver := make(chan slack.SlackEvent)
 
-    api := slack.New("xoxb-66220411602-wZgsZhcITvQ3YEJMxFEn69RG")
+    api := slack.New("YOUR TOKEN HERE")
     // api.SetDebug(true)
     wsAPI, err := api.StartRTM("", "http://example.com")
     if err != nil {
