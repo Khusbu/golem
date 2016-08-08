@@ -8,8 +8,9 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
-
+  "strings"
 	"github.com/nlopes/slack"
+  "golem/zomato"
 )
 
 func getPugURL(url string) string {
@@ -172,6 +173,22 @@ func main() {
 						fmt.Printf("Message successfully sent to channel %s at %s", channelID, timestamp)
 					}
 				}
+        if strings.HasPrefix(a.Msg.Text, "zomato") {
+          cmd := strings.Fields(a.Msg.Text)
+          city, query := cmd[1], cmd[2:]
+          cityID := zomato.GetCityID(city)
+          restaurants := zomato.GetRestaurants(cityID, "city", strings.Join(query, " "))
+          var postMsg string
+          for _, restaurant := range restaurants {
+            postMsg = fmt.Sprintf("%sName: %s(%s)\nAddress: %s\nRating: %s (%s)\tVotes: %s\n\n", postMsg, restaurant.Restaurant.Name, restaurant.Restaurant.Cuisines, restaurant.Restaurant.Location.Address, restaurant.Restaurant.UserRating.AggregateRating, restaurant.Restaurant.UserRating.RatingText, restaurant.Restaurant.UserRating.Votes)
+          }
+          channelID, timestamp, err := api.PostMessage("C1Y7PBU9X", postMsg, slack.PostMessageParameters{})
+          if err != nil {
+            fmt.Printf("%s\n", err)
+            return
+          }
+          fmt.Printf("Message successfully sent to channel %s at %s", channelID, timestamp)
+        }
 
 				if a.Msg.Text == "help" {
 					helpDoc := `help doc:
@@ -180,7 +197,8 @@ func main() {
                   pug bomb N - Receive N pugs
                   movies showing in <city> - Movies showing in <city>
                   movies coming soon in <city> - Movies coming soon in <city>
-                  movie imdb <movie name> - Shows IMDB rating for <movie name>`
+                  movie imdb <movie name> - Shows IMDB rating for <movie name>
+                  zomato <city> <restaurant-name>`
 
 					channelID, timestamp, err := api.PostMessage("C1Y7PBU9X", helpDoc, slack.PostMessageParameters{})
 					if err != nil {
